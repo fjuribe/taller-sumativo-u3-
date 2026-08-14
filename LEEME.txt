@@ -1,0 +1,57 @@
+ENTREGA — Taller sumativo: Script de respuesta ante incidentes en Linux
+=======================================================================
+
+Qué hay en esta carpeta
+-----------------------
+  invoke-ir.sh              Script Bash pedido por la pauta
+  INFORME_TECNICO.md        Informe (resumen, escenario, desarrollo,
+                            evidencia, contención, explicación, conclusiones)
+  evidencia_ejecucion/      Archivos de ejemplo generados por el flujo
+                            (ps, ss, hashes, log, manifiesto)
+  LEEME.txt                 Esta guía breve
+
+Cómo se orquesta todo (orden del script)
+----------------------------------------
+  1) Root + directorio /var/log/ir_evidence_<fecha-hora> (chmod 700)
+  2) Procesos     → 01_*.txt          (ps aux / --forest + filtro sospechosos)
+  3) Red          → 02_*.txt          (ss -tunap, ESTAB externas, IP IoC)
+  4) Integridad   → 03_*.sha256       (SHA-256 de ssh, sudo, bash, sshd)
+  5) Contención   → 04_iptables_*     (DROP 203.0.113.50, sin duplicar reglas)
+  6) Cierre       → 05_MANIFEST.sha256 + inventario + log
+
+  Regla de oro: primero se captura lo volátil; al final se toca el firewall
+  y se sella la carpeta con hashes.
+
+Cómo lo prueba el profesor
+--------------------------
+  chmod +x invoke-ir.sh
+  sudo ./invoke-ir.sh
+  # Revisar la ruta que imprime el script, por ejemplo:
+  sudo ls -la /var/log/ir_evidence_*
+  sudo less /var/log/ir_evidence_*/ir_execution.log
+  sudo sha256sum -c /var/log/ir_evidence_*/05_MANIFEST.sha256
+
+Nota sobre evidencia_ejecucion/
+-------------------------------
+  Incluye salidas reales de ps/ss/sha256sum del entorno donde se preparó
+  la entrega. La parte de iptables necesita root; el bloqueo está en el
+  script (comprobado con iptables -C antes de -A). En el servidor del
+  laboratorio, sudo ./invoke-ir.sh genera el paquete completo en /var/log.
+
+Qué NO se entrega (y no hace falta)
+-----------------------------------
+  Archivos de apoyo internos del alumno (notas de agentes, guidelines
+  auxiliares, PDF del solucionario del curso). La pauta pide: script +
+  informe + evidencias. Eso es lo que está aquí.
+
+Cobertura de la pauta (check rápido)
+------------------------------------
+  [x] Shebang + set -euo pipefail
+  [x] readonly (evidencia, IP, binarios)
+  [x] mkdir evidencia + chmod 700 + log + root
+  [x] ps aux --forest + sospechosos sin TTY / CPU alta
+  [x] ss -tunap + ESTAB externas (sin 127.0.0.1)
+  [x] SHA-256 binarios críticos
+  [x] iptables DROP idempotente + verificación
+  [x] Manifiesto SHA-256 de cierre
+  [x] Informe con la estructura solicitada

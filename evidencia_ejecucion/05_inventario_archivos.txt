@@ -1,0 +1,11 @@
+entregables/evidencia_ejecucion/01_procesos_aux.txt
+entregables/evidencia_ejecucion/01_procesos_forest.txt
+entregables/evidencia_ejecucion/01_procesos_sospechosos.txt
+entregables/evidencia_ejecucion/02_conexiones_externas_estab.txt
+entregables/evidencia_ejecucion/02_conexiones_ip_sospechosa.txt
+entregables/evidencia_ejecucion/02_conexiones_ss.txt
+entregables/evidencia_ejecucion/03_integridad_binarios.sha256
+entregables/evidencia_ejecucion/04_iptables_after.rules
+entregables/evidencia_ejecucion/04_iptables_before.rules
+entregables/evidencia_ejecucion/04_iptables_verificacion.txt
+entregables/evidencia_ejecucion/ir_execution.log

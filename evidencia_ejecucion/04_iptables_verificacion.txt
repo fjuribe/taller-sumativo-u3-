@@ -1,0 +1,7 @@
+=== Reglas esperadas tras contención (sudo ./invoke-ir.sh) ===
+INPUT  -s 203.0.113.50 -j DROP
+OUTPUT -d 203.0.113.50 -j DROP
+
+Nota: este paquete incluye evidencia real de ps/ss/sha256sum generada en el
+host de desarrollo. Las reglas iptables requieren root; el bloqueo queda
+implementado e idempotente en invoke-ir.sh (iptables -C antes de -A).

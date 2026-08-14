@@ -1,0 +1,7 @@
+# Captura de ejemplo (ejecución sin privilegios root en este entorno de desarrollo).
+# En ejecución real: salida completa de iptables-save ANTES de la contención.
+*filter
+:INPUT ACCEPT [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+COMMIT

@@ -1,0 +1,12 @@
+[2026-08-13 21:51:25] [INFO    ] Iniciando protocolo IR (muestra de evidencia para entrega)
+[2026-08-13 21:51:25] [INFO    ] IP sospechosa: 203.0.113.50
+[2026-08-13 21:51:25] [INFO    ] Capturando procesos (ps aux --forest)
+[2026-08-13 21:51:25] [INFO    ] Capturando conexiones (ss -tunap)
+[2026-08-13 21:51:25] [INFO    ] Calculando SHA-256 de binarios críticos
+[2026-08-13 21:51:25] [INFO    ] Hash OK: /usr/bin/ssh
+[2026-08-13 21:51:25] [INFO    ] Hash OK: /usr/bin/sudo
+[2026-08-13 21:51:25] [INFO    ] Hash OK: /bin/bash
+[2026-08-13 21:51:25] [INFO    ] Hash OK: /usr/sbin/sshd
+[2026-08-13 21:51:25] [WARNING ] Contención iptables: requiere ejecución con sudo en el servidor
+[2026-08-13 21:51:25] [INFO    ] Generando manifiesto SHA-256 de la evidencia
+[2026-08-13 21:51:25] [INFO    ] Protocolo IR finalizado (paquete de entrega)

@@ -1,0 +1,10 @@
+# Captura de ejemplo. En ejecución real (sudo ./invoke-ir.sh) aparecen:
+# -A INPUT -s 203.0.113.50/32 -j DROP
+# -A OUTPUT -d 203.0.113.50/32 -j DROP
+*filter
+:INPUT ACCEPT [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+-A INPUT -s 203.0.113.50/32 -j DROP
+-A OUTPUT -d 203.0.113.50/32 -j DROP
+COMMIT
