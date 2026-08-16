@@ -148,7 +148,9 @@ fi
 log "INFO" "Nota: DROP total solo sobre esa IP; no se modificó la política por defecto"
 
 #--- 6. Cierre: inventario y sello criptográfico -------------------------------
-log "INFO" "Generando manifiesto SHA-256 de la evidencia"
+# A partir de aquí no se vuelve a escribir en ir_execution.log: cualquier log()
+# posterior invalidaría su propio hash dentro del manifiesto.
+log "INFO" "Generando manifiesto SHA-256 de la evidencia (último registro del log)"
 
 find "${EVIDENCE_DIR}" -type f ! -name '05_MANIFEST.sha256' | sort \
     > "${EVIDENCE_DIR}/05_inventario_archivos.txt"
@@ -158,9 +160,7 @@ find "${EVIDENCE_DIR}" -type f ! -name '05_MANIFEST.sha256' | sort \
     find . -type f ! -name '05_MANIFEST.sha256' -print0 | sort -z | xargs -0 sha256sum
 ) > "${EVIDENCE_DIR}/05_MANIFEST.sha256"
 chmod 400 "${EVIDENCE_DIR}/05_MANIFEST.sha256"
-
-log "INFO" "Manifiesto: ${EVIDENCE_DIR}/05_MANIFEST.sha256"
-log "INFO" "Protocolo IR finalizado"
+chmod 400 "${EVIDENCE_DIR}/ir_execution.log"
 
 echo
 echo "================================================================"

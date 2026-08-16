@@ -1,7 +1,13 @@
-=== Reglas esperadas tras contención (sudo ./invoke-ir.sh) ===
-INPUT  -s 203.0.113.50 -j DROP
-OUTPUT -d 203.0.113.50 -j DROP
+=== INPUT ===
+Chain INPUT (policy ACCEPT 0 packets, 0 bytes)
+num   pkts bytes target     prot opt in     out     source               destination         
+1        0     0 DROP       all  --  *      *       203.0.113.50         0.0.0.0/0           
 
-Nota: este paquete incluye evidencia real de ps/ss/sha256sum generada en el
-host de desarrollo. Las reglas iptables requieren root; el bloqueo queda
-implementado e idempotente en invoke-ir.sh (iptables -C antes de -A).
+=== OUTPUT ===
+Chain OUTPUT (policy ACCEPT 0 packets, 0 bytes)
+num   pkts bytes target     prot opt in     out     source               destination         
+1        0     0 DROP       all  --  *      *       0.0.0.0/0            203.0.113.50        
+
+=== Reglas con IP sospechosa ===
+-A INPUT -s 203.0.113.50/32 -j DROP
+-A OUTPUT -d 203.0.113.50/32 -j DROP

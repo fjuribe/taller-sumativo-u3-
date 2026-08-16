@@ -29,26 +29,25 @@ El flujo sigue buenas prácticas de IR: **primero recolectar y documentar, despu
 | Contención | Reglas `iptables` DROP en INPUT/OUTPUT (requiere root); comprobación previa (`-C`) para no duplicar |
 | Cadena de custodia | Log con timestamps + `05_MANIFEST.sha256` de todos los artefactos |
 | Idempotencia | Puede reejecutarse sin duplicar reglas de firewall |
-| Modo sin root | Recolecta evidencia y documenta el bloqueo esperado si no hay privilegios |
+| Requisito de root | El script corta al inicio si no se ejecuta como root, antes de tocar nada |
 
 ---
 
 ## Estructura del repositorio
 
 ```text
-entregables/
-├── README.md                 # Este documento
-├── LEEME.txt                 # Instrucciones rápidas (ES)
-├── INFORME_TECNICO.md        # Análisis, hallazgos y justificación técnica
-├── invoke-ir.sh              # Script principal del protocolo IR
-└── evidencia_ejecucion/      # Artefactos generados en una corrida de ejemplo
-    ├── ir_execution.log
-    ├── 01_procesos_*.txt
-    ├── 02_conexiones_*.txt
-    ├── 03_integridad_binarios.sha256
-    ├── 04_iptables_*.rules / 04_iptables_verificacion.txt
-    ├── 05_inventario_archivos.txt
-    └── 05_MANIFEST.sha256
+README.md                   # Este documento
+LEEME.txt                   # Instrucciones rápidas (ES)
+INFORME_TECNICO.md          # Análisis, hallazgos y justificación técnica
+invoke-ir.sh                # Script principal del protocolo IR
+evidencia_ejecucion/        # Artefactos generados en una corrida de ejemplo
+├── ir_execution.log
+├── 01_procesos_*.txt
+├── 02_conexiones_*.txt
+├── 03_integridad_binarios.sha256
+├── 04_iptables_*.rules / 04_iptables_verificacion.txt
+├── 05_inventario_archivos.txt
+└── 05_MANIFEST.sha256
 ```
 
 ---
@@ -59,36 +58,18 @@ entregables/
 - **Shell:** Bash
 - **Herramientas:** `ps`, `ss` (iproute2), `sha256sum`, `date`, `find`
 - **Contención:** `iptables` / `iptables-save` (requiere root o `sudo`)
-- **Privilegios:**
-  - Usuario normal → fases 1–3 y 5 (recolección e integridad)
-  - `root` / `sudo` → fase 4 (bloqueo de IP)
+- **Privilegios:** el script exige `root` desde el inicio (`EUID = 0`); si no hay privilegios, corta la ejecución antes de tocar nada.
 
 ---
 
 ## Uso rápido
 
 ```bash
-cd entregables
 chmod +x invoke-ir.sh
-
-# Ejecución completa (laboratorio / host de prueba)
 sudo ./invoke-ir.sh
-
-# Solo recolección de evidencia (sin modificar firewall)
-./invoke-ir.sh
 ```
 
-### Variables de entorno opcionales
-
-| Variable | Por defecto | Uso |
-|----------|-------------|-----|
-| `SUSPICIOUS_IP` | `203.0.113.50` | IoC de red a buscar y bloquear (RFC 5737) |
-| `EVIDENCE_DIR` | `./evidencia_ejecucion` | Directorio de salida de artefactos |
-
-```bash
-sudo SUSPICIOUS_IP=198.51.100.10 ./invoke-ir.sh
-sudo EVIDENCE_DIR=/tmp/ir_caso_001 ./invoke-ir.sh
-```
+La IP a bloquear (`203.0.113.50`, rango de documentación RFC 5737) y el directorio de evidencia (`/var/log/ir_evidence_<fecha>_<hora>`) están fijos como `readonly` dentro del script. Para usar otra IP u otra ruta hay que editar esas constantes al principio de `invoke-ir.sh`.
 
 ---
 
@@ -108,15 +89,13 @@ Todas las operaciones quedan en `ir_execution.log` con marca de tiempo.
 
 ## Cómo probarlo
 
-### 1. Recolección sin root
+### 1. Sin privilegios de root
 
 ```bash
 ./invoke-ir.sh
-ls -la evidencia_ejecucion/
-cat evidencia_ejecucion/ir_execution.log
 ```
 
-**Esperado:** archivos `01_*`, `02_*`, `03_*` y `05_*`; el log indica si la contención quedó pendiente por falta de privilegios.
+**Esperado:** el script corta de inmediato con `CRITICAL: Este script debe ejecutarse como root.` (sale antes de tocar nada).
 
 ### 2. Contención completa (root)
 
@@ -140,31 +119,37 @@ sudo ./invoke-ir.sh
 ### 4. Cadena de custodia
 
 ```bash
-cd evidencia_ejecucion
+cd /var/log/ir_evidence_<fecha_hora>
 sha256sum -c 05_MANIFEST.sha256
 ```
 
 **Esperado:** todos los archivos del manifiesto en estado `OK` (si no se modificaron tras la corrida).
 
-### 5. IoC personalizado
-
-```bash
-sudo SUSPICIOUS_IP=198.51.100.25 ./invoke-ir.sh
-grep -R "198.51.100.25" evidencia_ejecucion/
-```
-
 ---
 
 ## Evidencia incluida
 
-La carpeta `evidencia_ejecucion/` incluye una **corrida de referencia**:
+La carpeta `evidencia_ejecucion/` es una copia de una corrida real de `sudo ./invoke-ir.sh` (hecha en un contenedor Linux con permisos de root), tal cual la generó el script en `/var/log/ir_evidence_<fecha_hora>/`:
 
 - Listados reales de procesos y conexiones (`ps` / `ss`)
 - Hashes SHA-256 reales de binarios del sistema
-- Capturas / plantillas de reglas `iptables` (el bloqueo efectivo requiere `sudo` en el host destino)
-- Manifiesto `05_MANIFEST.sha256` para validar integridad de los artefactos
+- Reglas `iptables` antes/después con el bloqueo de `203.0.113.50` ya aplicado
+- Manifiesto `05_MANIFEST.sha256`, verificado con `sha256sum -c` (todo `OK`, incluido el propio log)
 
 Análisis detallado: **[INFORME_TECNICO.md](./INFORME_TECNICO.md)**.
+
+### Reproducir la evidencia con Docker
+
+No hace falta una VM Linux: el repo trae un `Dockerfile` que arma una imagen mínima (Ubuntu + `iptables`/`iproute2`/`procps`) y corre `invoke-ir.sh` como root dentro del contenedor.
+
+```bash
+docker build -t ir-lab .
+mkdir -p var_log
+docker run --rm --cap-add=NET_ADMIN --cap-add=NET_RAW -v "$(pwd)/var_log:/var/log" ir-lab
+ls var_log/ir_evidence_*
+```
+
+Al montar `/var/log` como volumen, la carpeta `ir_evidence_<fecha_hora>` queda directo en `var_log/` del host, igual que en un servidor real.
 
 ---
 
