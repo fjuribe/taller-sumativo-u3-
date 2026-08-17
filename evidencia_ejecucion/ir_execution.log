@@ -1,12 +1,20 @@
-[2026-08-13 21:51:25] [INFO    ] Iniciando protocolo IR (muestra de evidencia para entrega)
-[2026-08-13 21:51:25] [INFO    ] IP sospechosa: 203.0.113.50
-[2026-08-13 21:51:25] [INFO    ] Capturando procesos (ps aux --forest)
-[2026-08-13 21:51:25] [INFO    ] Capturando conexiones (ss -tunap)
-[2026-08-13 21:51:25] [INFO    ] Calculando SHA-256 de binarios críticos
-[2026-08-13 21:51:25] [INFO    ] Hash OK: /usr/bin/ssh
-[2026-08-13 21:51:25] [INFO    ] Hash OK: /usr/bin/sudo
-[2026-08-13 21:51:25] [INFO    ] Hash OK: /bin/bash
-[2026-08-13 21:51:25] [INFO    ] Hash OK: /usr/sbin/sshd
-[2026-08-13 21:51:25] [WARNING ] Contención iptables: requiere ejecución con sudo en el servidor
-[2026-08-13 21:51:25] [INFO    ] Generando manifiesto SHA-256 de la evidencia
-[2026-08-13 21:51:25] [INFO    ] Protocolo IR finalizado (paquete de entrega)
+[2026-08-16 14:07:32] [INFO    ] Iniciando protocolo IR. Evidencia: /var/log/ir_evidence_20260816_140732
+[2026-08-16 14:07:32] [INFO    ] IP sospechosa: 203.0.113.50
+[2026-08-16 14:07:32] [INFO    ] Host: b63afd6e54a6 | Kernel: 6.10.14-linuxkit
+[2026-08-16 14:07:32] [INFO    ] Capturando procesos (ps aux --forest)
+[2026-08-16 14:07:32] [WARNING ] Procesos sin TTY con CPU >= 10.0%: 1
+[2026-08-16 14:07:32] [INFO    ] Capturando conexiones (ss -tunap)
+[2026-08-16 14:07:32] [INFO    ] Conexiones ESTAB externas: 1
+[2026-08-16 14:07:32] [WARNING ] Coincidencias con 203.0.113.50: 1
+[2026-08-16 14:07:32] [INFO    ] Calculando SHA-256 de binarios críticos
+[2026-08-16 14:07:32] [INFO    ] Hash OK: /usr/bin/ssh
+[2026-08-16 14:07:32] [INFO    ] Hash OK: /usr/bin/sudo
+[2026-08-16 14:07:32] [INFO    ] Hash OK: /bin/bash
+[2026-08-16 14:07:32] [INFO    ] Hash OK: /usr/sbin/sshd
+[2026-08-16 14:07:32] [INFO    ] Respaldo iptables (antes de contención)
+[2026-08-16 14:07:32] [INFO    ] Bloqueando 203.0.113.50 (INPUT origen / OUTPUT destino)
+[2026-08-16 14:07:32] [WARNING ] Regla aplicada: INPUT -s 203.0.113.50 -j DROP
+[2026-08-16 14:07:32] [WARNING ] Regla aplicada: OUTPUT -d 203.0.113.50 -j DROP
+[2026-08-16 14:07:32] [INFO    ] Contención verificada para 203.0.113.50
+[2026-08-16 14:07:32] [INFO    ] Nota: DROP total solo sobre esa IP; no se modificó la política por defecto
+[2026-08-16 14:07:32] [INFO    ] Generando manifiesto SHA-256 de la evidencia (último registro del log)

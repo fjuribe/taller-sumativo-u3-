@@ -1,0 +1,13 @@
+# Archivos de bloqueo de LibreOffice/OpenOffice
+.~lock.*#
+
+# Temporales de editores
+*.swp
+*.swo
+*~
+
+# macOS
+.DS_Store
+
+# Salida local al probar invoke-ir.sh con Docker (ver README)
+/var_log/
